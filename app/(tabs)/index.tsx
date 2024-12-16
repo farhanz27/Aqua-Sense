@@ -1,74 +1,223 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import firebase from '../../firebase';
+import { useState, useEffect } from 'react';
+import { Text, View, StyleSheet } from 'react-native';
+import { ref, onValue } from 'firebase/database';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// Define sensor data type
+type SensorData = {
+  value: number;
+  timestamp: string;
+};
 
-export default function HomeScreen() {
+// Sensor thresholds and colors (can be adjusted)
+const SENSOR_THRESHOLDS = {
+  ph: { danger: [0, 6.5, 9.0, 14], warning: [6.5, 7.5, 8.5, 9.0], safe: [7.5, 8.5] },
+  tds: { danger: [1500, 2000], warning: [1000, 1500], safe: [0, 500] },
+  temperature: { danger: [0, 15, 35, 40], warning: [15, 25, 30, 35], safe: [25, 32] },
+};
+
+// Helper to determine status colors
+const getStatusColor = (sensor: string, value: number) => {
+  const thresholds = SENSOR_THRESHOLDS[sensor as keyof typeof SENSOR_THRESHOLDS]; // Type assertion
+  if (!thresholds) return '#28A745'; // Default Green (Modern, safe)
+
+  if (sensor === 'ph') {
+    // pH ranges
+    if (value < thresholds.danger[0] || value > thresholds.danger[3]) return '#DC3545'; // Red (Danger)
+    if (value < thresholds.warning[0] || value > thresholds.warning[3]) return '#FFC107'; // Yellow (Warning)
+    return '#28A745'; // Green (Safe)
+  }
+
+  if (sensor === 'temperature') {
+    // Temperature ranges
+    if (value < thresholds.danger[0] || value > thresholds.danger[3]) return '#DC3545'; // Red (Danger)
+    if (value < thresholds.warning[0] || value > thresholds.warning[3]) return '#FFC107'; // Yellow (Warning)
+    return '#28A745'; // Green (Safe)
+  }
+
+  if (sensor === 'tds') {
+    // TDS ranges
+    if (value < thresholds.danger[0] || value > thresholds.danger[1]) return '#DC3545'; // Red (Danger)
+    if (value < thresholds.warning[0] || value > thresholds.warning[1]) return '#FFC107'; // Yellow (Warning)
+    return '#28A745'; // Green (Safe)
+  }
+
+  return '#28A745'; // Default safe color
+};
+
+// Helper to get unit for each sensor
+const getUnit = (sensor: string) => {
+  switch (sensor) {
+    case 'ph':
+      return 'pH';
+    case 'tds':
+      return 'ppm'; // Parts per million
+    case 'temperature':
+      return '°C'; // Celsius
+    default:
+      return '';
+  }
+};
+
+// Helper function to ensure valid number (fallback to 0 if NaN)
+const validateSensorValue = (value: any): number => {
+  const numericValue = parseFloat(value);
+  return isNaN(numericValue) ? 0 : numericValue;
+};
+
+// Sensor Card Component
+const SensorCard = ({ sensor, value, timestamp }: { sensor: string; value: number; timestamp: string }) => {
+  const statusColor = getStatusColor(sensor, value);
+  const unit = getUnit(sensor);
+
+  // Helper function to get sensor description
+  const getSensorDescription = (sensor: string) => {
+    switch (sensor) {
+      case 'tds':
+        return 'Total Dissolved Solids';
+      case 'temperature':
+        return 'Temperature';
+      case 'ph':
+        return 'pH';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.sensorCard}>
+      <View style={styles.sensorHeader}>
+        <MaterialCommunityIcons
+          name={sensor === 'ph' ? 'beaker' : sensor === 'temperature' ? 'thermometer' : 'water'}
+          size={24}
+          color="#4A90E2" // Modern blue icon color
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <Text style={styles.sensorTitle}>{getSensorDescription(sensor)}</Text>
+      </View>
+
+      {/* Meter Indicator */}
+      <View style={styles.meterContainer}>
+        <View
+          style={[styles.meterFill, { width: `${Math.min((value / 10) * 100, 100)}%`, backgroundColor: statusColor }]}
+        >
+          <Text style={styles.meterText}>{value.toFixed(1)} {unit}</Text>
+        </View>
+      </View>
+
+      <Text style={styles.timestampText}>Last Updated: {timestamp}</Text>
+    </View>
+  );
+};
+
+export default function DashboardScreen() {
+  const [sensorData, setSensorData] = useState<Record<string, SensorData> | null>(null);
+
+  useEffect(() => {
+    const dataRef = ref(firebase.database, 'sensors');
+
+    const listener = onValue(
+      dataRef,
+      (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const latestData: Record<string, SensorData> = {};
+
+          // Process each sensor's latest data
+          Object.keys(data).forEach((sensor) => {
+            const entries = data[sensor];
+            const latestKey = Object.keys(entries).pop();
+            if (latestKey) {
+              latestData[sensor] = {
+                value: validateSensorValue(entries[latestKey]),
+                timestamp: latestKey,
+              };
+            }
+          });
+
+          setSensorData(latestData);
+        }
+      },
+      (error) => {
+        console.error('Error fetching data from Firebase:', error);
+      }
+    );
+
+    return () => listener(); // Unsubscribe on unmount
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      {sensorData ? (
+        Object.keys(sensorData).map((sensor) => {
+          const { value, timestamp } = sensorData[sensor];
+          return <SensorCard key={sensor} sensor={sensor} value={value} timestamp={timestamp} />;
+        })
+      ) : (
+        <Text style={styles.loadingText}>Loading data...</Text>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F7F7F7',
+    padding: 20,
+  },
+  sensorCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  sensorHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 12,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  sensorTitle: {
+    fontSize: 18,
+    color: '#333',
+    fontWeight: 'bold',
+    marginLeft: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  meterContainer: {
+    height: 30,
+    width: '100%',
+    backgroundColor: '#EDEDED',
+    borderRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
+    marginVertical: 10,
+  },
+  meterFill: {
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+  meterText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  timestampText: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#4A90E2',
+    textAlign: 'center',
+    marginTop: 50,
   },
 });
