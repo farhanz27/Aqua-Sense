@@ -1,50 +1,32 @@
-# Welcome to your Expo app 👋
+# Welcome to Aqua Sense 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is an [Expo](https://expo.dev) project designed to help users monitor and maintain optimal conditions for home-based aquaculture systems.
 
-## Get started
+## ✨ Features
 
-1. Install dependencies
+### 🌟 Dashboard
+- Real-time sensor readings for **pH**, **Temperature**, and **Total Dissolved Solids (TDS)**.
+- Intuitive color-coded status indicators: **Safe (Green)**, **Warning (Yellow)**, **Danger (Red)**.
 
-   ```bash
-   npm install
-   ```
+### 📊 Analytics
+- Visualize historical data trends through interactive charts.
+- Filter data by:
+  - Sensor type (pH, Temperature, TDS)
+  - Month and Year
+- Predict future water conditions using **machine learning** and **Firebase Cloud Functions**.
 
-2. Start the app
+### 🔔 Notifications
+- Alerts for significant deviations from optimal water conditions.
+- Suggests actionable solutions to restore balance.
 
-   ```bash
-    npx expo start
-   ```
+### ⚙️ Settings
+- Manage user profile and preferences.
+- Options to adjust themes and notification settings.
 
-In the output, you'll find options to open the app in a
+## 🛠 Technologies Used
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **React Native (Expo)**: Cross-platform mobile development.
+- **Firebase Realtime Database**: Real-time sensor data storage and retrieval.
+- **Firebase Cloud Messaging**: Push notification delivery.
+- **React Native Chart Kit**: Data visualization.
+- **Firebase Cloud Functions**: Backend analytics and predictions.

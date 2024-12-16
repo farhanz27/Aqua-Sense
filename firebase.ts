@@ -1,22 +1,22 @@
-// firebase.ts
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 const firebaseConfig = {
-    apiKey: "AIzaSyA77MNzv0Fe2x3SqEKRQUgM_CUcbJ9_o44",
-    authDomain: "final-year-project-5f26d.firebaseapp.com",
-    databaseURL: "https://final-year-project-5f26d-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "final-year-project-5f26d",
-    storageBucket: "final-year-project-5f26d.firebasestorage.app",
-    messagingSenderId: "742653001503",
-    appId: "1:742653001503:web:cb7d9f06b275cb118cfa2a",
-    measurementId: "G-DR2ZRLV95V"
-  };
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+};
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Realtime Database and get a reference to the service
 const database = getDatabase(app);
 
 export default { app, database };
