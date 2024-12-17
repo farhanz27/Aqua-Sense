@@ -10,12 +10,25 @@ type SensorData = {
   timestamp: string;
 };
 
-// Sensor thresholds and colors (can be adjusted)
+// Sensor thresholds
 const SENSOR_THRESHOLDS = {
-  ph: { danger: [0, 6.5, 9.0, 14], warning: [6.5, 7.5, 8.5, 9.0], safe: [7.5, 8.5] },
-  tds: { danger: [1500, 2000], warning: [1000, 1500], safe: [0, 500] },
-  temperature: { danger: [0, 15, 35, 40], warning: [15, 25, 30, 35], safe: [25, 32] },
+  ph: {
+    danger: [0, 6.0, 9.5, 14],  // Danger if pH < 6.0 or > 9.5
+    warning: [6.0, 7.0, 8.0, 9.5], // Warning zones
+    safe: [7.0, 8.0], // Optimal range
+  },
+  tds: {
+    danger: [2000, 3000], // Critical TDS levels (> 3000 ppm)
+    warning: [1000, 2000], // High but manageable
+    safe: [300, 1000], // Optimal range for freshwater
+  },
+  temperature: {
+    danger: [0, 10, 35, 40], // Critical cold (< 10°C) and extreme heat (> 35°C)
+    warning: [10, 20, 30, 35], // Suboptimal range
+    safe: [20, 30], // Optimal temperature range for most aquaculture
+  },
 };
+
 
 // Helper to determine status colors
 const getStatusColor = (sensor: string, value: number) => {
@@ -24,26 +37,27 @@ const getStatusColor = (sensor: string, value: number) => {
 
   if (sensor === 'ph') {
     // pH ranges
-    if (value < thresholds.danger[0] || value > thresholds.danger[3]) return '#DC3545'; // Red (Danger)
-    if (value < thresholds.warning[0] || value > thresholds.warning[3]) return '#FFC107'; // Yellow (Warning)
+    if (value < thresholds.danger[1] || value > thresholds.danger[2]) return '#DC3545'; // Red (Danger)
+    if (value < thresholds.warning[1] || value > thresholds.warning[2]) return '#FFC107'; // Yellow (Warning)
     return '#28A745'; // Green (Safe)
   }
-
+  
   if (sensor === 'temperature') {
     // Temperature ranges
-    if (value < thresholds.danger[0] || value > thresholds.danger[3]) return '#DC3545'; // Red (Danger)
-    if (value < thresholds.warning[0] || value > thresholds.warning[3]) return '#FFC107'; // Yellow (Warning)
+    if (value < thresholds.danger[1] || value > thresholds.danger[2]) return '#DC3545'; // Red (Danger)
+    if (value < thresholds.warning[1] || value > thresholds.warning[2]) return '#FFC107'; // Yellow (Warning)
     return '#28A745'; // Green (Safe)
   }
-
+  
   if (sensor === 'tds') {
     // TDS ranges
-    if (value < thresholds.danger[0] || value > thresholds.danger[1]) return '#DC3545'; // Red (Danger)
-    if (value < thresholds.warning[0] || value > thresholds.warning[1]) return '#FFC107'; // Yellow (Warning)
+    if (value > thresholds.danger[1]) return '#DC3545'; // Red (Danger)
+    if (value > thresholds.warning[1]) return '#FFC107'; // Yellow (Warning)
     return '#28A745'; // Green (Safe)
   }
-
+  
   return '#28A745'; // Default safe color
+  
 };
 
 // Helper to get unit for each sensor
