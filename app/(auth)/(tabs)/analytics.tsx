@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { ref, onValue } from "firebase/database";
-import firebase from "../../firebase";
+import firebase from "@/firebase";
 import { LineChart } from "react-native-chart-kit";
 
 export default function AnalyticsScreen() {

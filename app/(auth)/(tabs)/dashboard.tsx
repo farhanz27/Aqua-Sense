@@ -1,4 +1,4 @@
-import firebase from '../../firebase';
+import firebase from '@/firebase';
 import { useState, useEffect } from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import { ref, onValue } from 'firebase/database';
