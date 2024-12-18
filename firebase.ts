@@ -1,6 +1,6 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getAuth } from "firebase/auth";
+import { initializeApp } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+import auth from '@react-native-firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -13,8 +13,8 @@ const firebaseConfig = {
   measurementId: process.env.EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
-const auth = getAuth(app);
 
 export default { app, database, auth };

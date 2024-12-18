@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.mohd_farhan.AquaSense",
@@ -29,9 +29,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#ffffff"
+          "image": "./assets/images/adaptive-icon.png",
+          "backgroundColor": "#ffffff",
+          "imageWidth": 200
         }
       ],
       [

@@ -13,7 +13,6 @@ type Notification = {
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  // Fetch notifications from AsyncStorage
   const fetchNotifications = async () => {
     const storedNotifications = (await AsyncStorage.getItem('notifications')) || '[]';
     setNotifications(JSON.parse(storedNotifications));
@@ -23,12 +22,10 @@ export default function NotificationsScreen() {
     fetchNotifications();
   }, []);
 
-  // View notification details
   const viewDetails = (notification: Notification) => {
     Alert.alert(notification.title, `${notification.body}\n\nTime: ${notification.timestamp}`);
   };
 
-  // Delete a notification
   const deleteNotification = async (id: string) => {
     const updatedNotifications = notifications.filter((item) => item.id !== id);
     setNotifications(updatedNotifications);
@@ -38,12 +35,11 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* <Text style={styles.header}>Notifications</Text> */}
-
       {notifications.length > 0 ? (
         <FlatList
           data={notifications}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <View style={styles.notificationCard}>
               <TouchableOpacity onPress={() => viewDetails(item)} style={{ flex: 1 }}>
@@ -51,7 +47,10 @@ export default function NotificationsScreen() {
                 <Text style={styles.notificationBody}>{item.body}</Text>
                 <Text style={styles.notificationTime}>{item.timestamp}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => deleteNotification(item.id)}>
+              <TouchableOpacity
+                onPress={() => deleteNotification(item.id)}
+                style={styles.deleteButton}
+              >
                 <MaterialCommunityIcons name="delete" size={24} color="#DC3545" />
               </TouchableOpacity>
             </View>
@@ -70,11 +69,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F7F7',
     padding: 20,
   },
-  header: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#25292e',
-    marginBottom: 10,
+  listContent: {
+    padding: 5,
   },
   notificationCard: {
     backgroundColor: '#FFFFFF',
@@ -109,5 +105,8 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     marginTop: 50,
+  },
+  deleteButton: {
+    marginLeft: 15,
   },
 });
