@@ -36,6 +36,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? "notifications" : "notifications-outline"} color={color} size={24} />
           ),
+          tabBarBadge: undefined, // Badge count dynamically set by NotificationsScreen
         }}
       />
       <Tabs.Screen

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { addNotificationListener, removeNotificationListener } from '@/utils/notifications';
 
 type Notification = {
   id: string;
@@ -12,6 +13,7 @@ type Notification = {
 
 export default function NotificationsScreen() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [expanded, setExpanded] = useState<{ [key: string]: boolean }>({}); // To track expanded state for each notification
 
   const fetchNotifications = async () => {
     const storedNotifications = (await AsyncStorage.getItem('notifications')) || '[]';
@@ -19,7 +21,19 @@ export default function NotificationsScreen() {
   };
 
   useEffect(() => {
+    // Fetch notifications on initial render
     fetchNotifications();
+
+    // Register real-time listener
+    const listener = (updatedNotifications: Notification[]) => {
+      setNotifications(updatedNotifications);
+    };
+    addNotificationListener(listener);
+
+    // Cleanup listener on unmount
+    return () => {
+      removeNotificationListener(listener);
+    };
   }, []);
 
   const viewDetails = (notification: Notification) => {
@@ -33,6 +47,10 @@ export default function NotificationsScreen() {
     Alert.alert('Deleted', 'Notification has been deleted.');
   };
 
+  const toggleExpanded = (id: string) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <View style={styles.container}>
       {notifications.length > 0 ? (
@@ -42,9 +60,17 @@ export default function NotificationsScreen() {
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
             <View style={styles.notificationCard}>
-              <TouchableOpacity onPress={() => viewDetails(item)} style={{ flex: 1 }}>
+              <TouchableOpacity onPress={() => toggleExpanded(item.id)} style={{ flex: 1 }}>
                 <Text style={styles.notificationTitle}>{item.title}</Text>
-                <Text style={styles.notificationBody}>{item.body}</Text>
+                <Text
+                  style={styles.notificationBody}
+                  numberOfLines={expanded[item.id] ? undefined : 4} // Show full text if expanded
+                >
+                  {item.body}
+                </Text>
+                {!expanded[item.id] && (
+                  <Text style={styles.viewMoreText}>View More</Text>
+                )}
                 <Text style={styles.notificationTime}>{item.timestamp}</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -94,6 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginTop: 4,
+    lineHeight: 20, // Optional: Better readability
   },
   notificationTime: {
     fontSize: 12,
@@ -108,5 +135,11 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: 15,
+  },
+  viewMoreText: {
+    fontSize: 14,
+    color: '#3A8DFF',
+    marginTop: 4,
+    fontWeight: 'bold',
   },
 });

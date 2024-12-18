@@ -26,7 +26,7 @@ const SENSOR_THRESHOLDS = {
 
 // Type Definitions
 type SensorType = keyof typeof SENSOR_THRESHOLDS;
-type SensorThresholds = {danger: number[]; warning: number[]; safe: number[]};
+type SensorThresholds = { danger: number[]; warning: number[]; safe: number[] };
 
 // Check thresholds
 const checkThreshold = (sensorType: SensorType, value: number): "danger" | "warning" | "safe" => {
@@ -39,6 +39,26 @@ const checkThreshold = (sensorType: SensorType, value: number): "danger" | "warn
     if (value < thresholds.warning[1] || value > thresholds.warning[2]) return "warning";
   }
   return "safe";
+};
+
+// Recommendations based on status
+const getRecommendations = (sensorType: SensorType, status: "danger" | "warning"): string => {
+  const recommendations = {
+    ph: {
+      danger: "Adjust pH immediately by adding buffer solutions for acidity or diluted acids for alkalinity.",
+      warning: "Monitor pH and prepare buffer solutions to stabilize.",
+    },
+    tds: {
+      danger: "Perform partial water changes and check for salt/mineral accumulation.",
+      warning: "Reduce feed and apply filtration to lower TDS levels.",
+    },
+    temperature: {
+      danger: "Use heaters for cold or chillers/shading for high temperatures.",
+      warning: "Monitor temperature trends. Prepare cooling/heating systems.",
+    },
+  };
+
+  return recommendations[sensorType][status];
 };
 
 // Firebase Realtime Database trigger
@@ -65,11 +85,11 @@ export const monitorSensorData = onValueCreated(
     let messageBody = "";
 
     if (status === "danger") {
-      messageTitle = `⚠️ Critical Alert: ${typedSensor.toUpperCase()}`;
-      messageBody = `${typedSensor.toUpperCase()} level critical at ${value}. Immediate attention required!`;
+      messageTitle = `❗ Critical Alert: ${typedSensor.toUpperCase()}`;
+      messageBody = `${typedSensor.toUpperCase()} level has exceeded safe limits at ${value}.\n\nImmediate action required!\n\nRecommendation:\n${getRecommendations(typedSensor, status)}`;
     } else if (status === "warning") {
       messageTitle = `⚠️ Warning: ${typedSensor.toUpperCase()}`;
-      messageBody = `${typedSensor.toUpperCase()} level warning at ${value}. Monitor the situation.`;
+      messageBody = `${typedSensor.toUpperCase()} level is approaching a non-optimal range at ${value}.\n\nPrepare to take corrective actions!\n\nRecommendation:\n${getRecommendations(typedSensor, status)}`;
     } else {
       return; // Safe range, no action
     }
@@ -95,4 +115,5 @@ export const monitorSensorData = onValueCreated(
     } catch (error) {
       console.error("Error sending notification:", error);
     }
-  });
+  }
+);

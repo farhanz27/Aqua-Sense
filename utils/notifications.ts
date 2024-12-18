@@ -2,6 +2,9 @@ import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 
+// Event emitter to notify components about changes
+const notificationListeners: ((notifications: any[]) => void)[] = [];
+
 /**
  * Request notification permissions from the user.
  */
@@ -31,7 +34,10 @@ export async function subscribeToTopic(topic: string) {
   }
 }
 
-// Save notification to AsyncStorage
+/**
+ * Save a notification to AsyncStorage and notify listeners.
+ * @param notification The incoming notification object.
+ */
 export async function saveNotification(notification: any) {
   const storedNotifications = (await AsyncStorage.getItem('notifications')) || '[]';
   const notifications = JSON.parse(storedNotifications);
@@ -44,9 +50,14 @@ export async function saveNotification(notification: any) {
   });
 
   await AsyncStorage.setItem('notifications', JSON.stringify(notifications));
+
+  // Notify all listeners
+  notificationListeners.forEach((listener) => listener(notifications));
 }
 
-// Handle notifications when the app is in the foreground
+/**
+ * Handle foreground notifications.
+ */
 export function handleForegroundMessages() {
   messaging().onMessage(async (remoteMessage) => {
     console.log('Message received in foreground:', remoteMessage);
@@ -55,10 +66,29 @@ export function handleForegroundMessages() {
   });
 }
 
-// Handle background and terminated state notifications
+/**
+ * Handle background notifications.
+ */
 export function handleBackgroundMessages() {
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     console.log('Message received in background:', remoteMessage);
     await saveNotification(remoteMessage);
   });
+}
+
+/**
+ * Register a listener to get real-time updates for notifications.
+ */
+export function addNotificationListener(listener: (notifications: any[]) => void) {
+  notificationListeners.push(listener);
+}
+
+/**
+ * Remove a notification listener.
+ */
+export function removeNotificationListener(listener: (notifications: any[]) => void) {
+  const index = notificationListeners.indexOf(listener);
+  if (index !== -1) {
+    notificationListeners.splice(index, 1);
+  }
 }
