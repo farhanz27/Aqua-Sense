@@ -113,7 +113,7 @@ const SensorCard = ({ sensor, value, timestamp }: { sensor: string; value: numbe
       {/* Meter Indicator */}
       <View style={styles.meterContainer}>
         <View
-          style={[styles.meterFill, { width: `${Math.min((value / 10) * 100, 100)}%`, backgroundColor: statusColor }]}
+          style={[styles.meterFill, { width: `100%`, backgroundColor: statusColor }]}
         >
           <Text style={styles.meterText}>{value.toFixed(1)} {unit}</Text>
         </View>

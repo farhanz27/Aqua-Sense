@@ -43,7 +43,7 @@ export default function Index() {
 
 	return (
 		<View style={styles.container}>
-			<StatusBar barStyle="dark-content" backgroundColor="#F7F7F7" />
+			{ <StatusBar barStyle="dark-content" backgroundColor="#F7F7F7" /> }
 			<KeyboardAvoidingView behavior="padding" style={styles.keyboard}>
 				<Text style={styles.title}>AquaSense</Text>
 

@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
     marginTop: 4,
-    lineHeight: 20, // Optional: Better readability
+    lineHeight: 20,
   },
   notificationTime: {
     fontSize: 12,

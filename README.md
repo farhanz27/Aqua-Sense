@@ -1,4 +1,4 @@
-# Welcome to Aqua Sense 👋
+# Welcome to AquaSense 👋
 
 This is an [Expo](https://expo.dev) project designed to help users monitor and maintain optimal conditions for home-based aquaculture systems.
 

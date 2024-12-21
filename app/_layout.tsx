@@ -1,7 +1,8 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
+import React from 'react';
 import { useEffect, useState } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StatusBar } from 'react-native';
 import { requestNotificationPermission, subscribeToTopic, handleForegroundMessages, handleBackgroundMessages } from '../utils/notifications';
 
 export default function RootLayout() {
@@ -57,9 +58,12 @@ export default function RootLayout() {
     );
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-    </Stack>
+        <>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack>
+    </>
   );
 }

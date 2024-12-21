@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "742653001503",
+    "firebase_url": "https://final-year-project-5f26d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "final-year-project-5f26d",
+    "storage_bucket": "final-year-project-5f26d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:742653001503:android:7f6b2cc2a83af86b8cfa2a",
+        "android_client_info": {
+          "package_name": "com.mohd_farhan.AquaSense"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "742653001503-huhp378lfv467qeha5k2d31q9nqnnvt4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.mohd_farhan.AquaSense",
+            "certificate_hash": "c0a42ecb91414e4a40b866501aaef45181fc9dbc"
+          }
+        },
+        {
+          "client_id": "742653001503-t2dsj154aqu7d9remvfo42hokqsmg0f9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBK87vwqHV_j6IUQsUScnYfSFwJDfrqEV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "742653001503-0dp8iaen6ao40gkg71ce2u6uevj6ts3k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "742653001503-tr1ucmp3mmrm9qpu56cfdjv1uh81a9ks.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mohdfarhan.AquaSense"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
