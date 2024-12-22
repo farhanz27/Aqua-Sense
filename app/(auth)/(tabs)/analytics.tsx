@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Dimensions, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { ref, onValue } from "firebase/database";
-import firebase from "@/firebase";
-import { LineChart } from "react-native-chart-kit";
+import database from "@react-native-firebase/database";
+import { LineChart } from "react-native-gifted-charts";
 
 export default function AnalyticsScreen() {
   const [sensorType, setSensorType] = useState("ph");
@@ -13,8 +12,7 @@ export default function AnalyticsScreen() {
   const [openMonth, setOpenMonth] = useState(false);
   const [openYear, setOpenYear] = useState(false);
 
-  const [labels, setLabels] = useState<string[]>([]);
-  const [values, setValues] = useState<number[]>([]);
+  const [dataPoints, setDataPoints] = useState<{ value: number; label: string }[]>([]);
 
   const SENSOR_TYPES = [
     { label: "pH", value: "ph" },
@@ -45,61 +43,62 @@ export default function AnalyticsScreen() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const startOfMonth = new Date(year, month, 1).getTime();
-      const endOfMonth = new Date(year, month + 1, 0).getTime();
       const daysInMonth = new Date(year, month + 1, 0).getDate();
-      const dataRef = ref(firebase.database, `sensors/${sensorType}`);
-
-      onValue(
-        dataRef,
-        (snapshot) => {
-          const data = snapshot.val();
-          const dailyData: { [day: number]: number[] } = {};
-
-          if (data) {
-            Object.keys(data).forEach((timestamp) => {
-              const entryTime = new Date(timestamp).getTime();
-              if (entryTime >= startOfMonth && entryTime <= endOfMonth) {
-                const day = new Date(timestamp).getDate();
-                if (!dailyData[day]) {
-                  dailyData[day] = [];
+  
+      console.log("Fetching data for:", sensorType, "Year:", year, "Month:", month);
+  
+      database()
+        .ref(`sensors/${sensorType}`)
+        .on(
+          "value",
+          (snapshot) => {
+            const rawData = snapshot.val();
+            console.log("Raw data:", rawData); // Debugging
+  
+            const dailyData: Record<number, number[]> = {};
+  
+            if (rawData) {
+              Object.keys(rawData).forEach((timestamp) => {
+                const date = new Date(timestamp); // Parse ISO 8601 string
+                const entryYear = date.getFullYear();
+                const entryMonth = date.getMonth();
+                const entryDay = date.getDate();
+  
+                // Filter by selected year and month
+                if (entryYear === year && entryMonth === month) {
+                  if (!dailyData[entryDay]) {
+                    dailyData[entryDay] = [];
+                  }
+                  dailyData[entryDay].push(parseFloat(rawData[timestamp]));
                 }
-                dailyData[day].push(parseFloat(data[timestamp]));
-              }
-            });
-          }
-
-          const chartLabels: string[] = [];
-          const chartValues: number[] = [];
-
-          for (let day = 1; day <= daysInMonth; day++) {
-            chartLabels.push(day.toString());
-            if (dailyData[day] && dailyData[day].length > 0) {
-              const average =
-                dailyData[day].reduce((sum, val) => sum + val, 0) /
-                dailyData[day].length;
-              chartValues.push(average);
-            } else {
-              chartValues.push(0); // No data for this day
+              });
             }
+  
+            // Compute daily averages and prepare chart data
+            const chartData = [];
+            for (let day = 1; day <= daysInMonth; day++) {
+              const values = dailyData[day] || [];
+              const average = values.length > 0 ? values.reduce((sum, val) => sum + val, 0) / values.length : 0;
+              chartData.push({ value: average, label: day.toString() });
+            }
+  
+            console.log("Chart data:", chartData); // Debugging
+            setDataPoints(chartData);
+          },
+          (error) => {
+            console.error("Error fetching data:", error);
           }
-
-          setLabels(chartLabels);
-          setValues(chartValues);
-        },
-        (error) => {
-          console.error("Error fetching data:", error);
-        }
-      );
+        );
     };
-
+  
     fetchData();
   }, [sensorType, month, year]);
+  
 
   return (
     <View style={styles.container}>
       {/* Filters Section */}
-      <View style={[styles.filterContainer, styles.shadow,]}>
+      <View style={[styles.filterContainer, styles.shadow]}>
         <Text style={styles.title}>Filters</Text>
         <DropDownPicker
           open={openSensor}
@@ -141,43 +140,29 @@ export default function AnalyticsScreen() {
           </View>
         </View>
       </View>
-      
+
       {/* Chart Section */}
       <View style={[styles.chartContainer, styles.shadow]}>
         <Text style={styles.title}>Chart</Text>
-        {values.length > 0 ? (
+        {dataPoints.length > 0 ? (
           <ScrollView horizontal>
             <LineChart
-              data={{
-                labels: labels,
-                datasets: [
-                  {
-                    data: values,
-                  },
-                ],
-              }}
-              width={Math.max(600, labels.length * 40)} // Adjust width for scrolling
+              data={dataPoints}
+              width={Math.max(600, dataPoints.length * 40)} // Adjust width for scrolling
               height={220}
-              chartConfig={{
-                backgroundGradientFrom: "#FFFFFF",
-                backgroundGradientTo: "#FFFFFF",
-                decimalPlaces: 1,
-                color: (opacity = 1) => `rgba(58, 141, 255, ${opacity})`,
-                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                style: {
-                  borderRadius: 16,
-                },
-                propsForDots: {
-                  r: "6",
-                  strokeWidth: "2",
-                  stroke: "#3A8DFF",
-                },
-              }}
-              bezier
-              style={{
-                marginVertical: 8,
-                borderRadius: 16,
-              }}
+              isAnimated
+              showVerticalLines
+              hideDataPoints={false} // Show data points
+              dataPointsShape="circle"
+              dataPointsRadius={4}
+              dataPointsColor="#3A8DFF"
+              spacing={40}
+              adjustToWidth
+              xAxisLabelTextStyle={{ color: "#999", fontSize: 10 }}
+              yAxisTextStyle={{ color: "#999", fontSize: 10 }}
+              xAxisThickness={1}
+              yAxisThickness={1}
+              areaChart
             />
           </ScrollView>
         ) : (

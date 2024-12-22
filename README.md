@@ -13,7 +13,6 @@ This is an [Expo](https://expo.dev) project designed to help users monitor and m
 - Filter data by:
   - Sensor type (pH, Temperature, TDS)
   - Month and Year
-- Predict future water conditions using **machine learning** and **Firebase Cloud Functions**.
 
 ### 🔔 Notifications
 - Alerts for significant deviations from optimal water conditions.
